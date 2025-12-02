@@ -4,22 +4,34 @@ import (
 	"context"
 	"log/slog"
 
+	"database/sql"
+	_ "embed"
+	"errors"
+
 	"github.com/ncostamagna/events-api/domain"
 )
 
 var (
-	// go:embed queries/create_event.sql
+	//go:embed queries/create_event.sql
 	createEventQuery string
 
-	// go:embed queries/get_event_by_id.sql
+	//go:embed queries/get_event_by_id.sql
 	getEventByIDQuery string
 
-	// go:embed queries/get_all_events.sql
+	//go:embed queries/get_all_events.sql
 	getAllEventsQuery string
 )
 
 func (db *DB) CreateEvent(ctx context.Context, event *domain.Event) error {
-	_, err := db.db.ExecContext(ctx, createEventQuery, event.Title, event.Description, event.StartTime, event.EndTime)
+	err := db.db.QueryRowContext(
+		ctx,
+		createEventQuery,
+		event.Title,
+		event.Description,
+		event.StartTime,
+		event.EndTime,
+	).Scan(&event.ID)
+
 	if err != nil {
 		return err
 	}
@@ -37,6 +49,9 @@ func (db *DB) GetEventByID(ctx context.Context, id string) (*domain.Event, error
 		&event.CreatedAt,
 	)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &event, nil

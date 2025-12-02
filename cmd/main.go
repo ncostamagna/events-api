@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/lib/pq"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/ncostamagna/events-api/pkg/bootstrap"
 	"github.com/ncostamagna/events-api/pkg/httputil"
 	"github.com/ncostamagna/events-api/pkg/log"

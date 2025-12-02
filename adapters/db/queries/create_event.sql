@@ -5,4 +5,5 @@ VALUES (
     $2,
     $3,
     $4
-);
+)
+RETURNING id;

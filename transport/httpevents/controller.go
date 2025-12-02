@@ -3,10 +3,12 @@ package httpevents
 import (
 	"context"
 
+	"errors"
+	"time"
+
+	"github.com/google/uuid"
 	"github.com/ncostamagna/events-api/internal/events"
 	"github.com/ncostamagna/go-http-utils/response"
-
-	"time"
 
 	"github.com/ncostamagna/events-api/pkg/httputil"
 )
@@ -42,8 +44,19 @@ func makeGet(service events.Service) httputil.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetReq)
 
+		if req.ID == "" {
+			return nil, response.BadRequest("ID is required")
+		}
+
+		if _, err := uuid.Parse(req.ID); err != nil {
+			return nil, response.BadRequest("Invalid UUID format")
+		}
+
 		event, err := service.GetEventByID(ctx, req.ID)
 		if err != nil {
+			if errors.Is(err, events.ErrEventNotFound) {
+				return nil, response.NotFound("Event not found")
+			}
 			return nil, response.InternalServerError(err.Error())
 		}
 
@@ -72,6 +85,22 @@ func makeStore(service events.Service) httputil.Endpoint {
 
 		if req.Description == "" {
 			return nil, response.BadRequest("Description is required")
+		}
+
+		if len(req.Title) > 100 {
+			return nil, response.BadRequest("Title must be less than 100 characters")
+		}
+
+		if req.StartTime.IsZero() {
+			return nil, response.BadRequest("Start time is required")
+		}
+
+		if req.EndTime.IsZero() {
+			return nil, response.BadRequest("End time is required")
+		}
+
+		if req.StartTime.After(req.EndTime) {
+			return nil, response.BadRequest("Start time must be before end time")
 		}
 
 		event, err := service.CreateEvent(ctx, req.Title, req.Description, req.StartTime, req.EndTime)
