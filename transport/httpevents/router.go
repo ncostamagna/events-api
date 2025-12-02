@@ -19,7 +19,7 @@ const (
 	ctxQuery  ctxKey = "query"
 )
 
-func NewHTTPServer(_ context.Context, endpoints Endpoints) http.Handler {
+func NewHTTPServer(endpoints Endpoints) http.Handler {
 
 	gin.SetMode(gin.ReleaseMode)
 

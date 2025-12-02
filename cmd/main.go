@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"os"
 
@@ -30,11 +29,9 @@ func main() {
 		}
 	}()
 
-	ctx := context.Background()
-
 	eventsSrv := bootstrap.NewEventsService(bootstrap.NewDatabase(logger), logger)
 
-	h := httpevents.NewHTTPServer(ctx, httpevents.MakeEndpoints(eventsSrv))
+	h := httpevents.NewHTTPServer(httpevents.MakeEndpoints(eventsSrv))
 
 	url := os.Getenv("APP_URL")
 	if url == "" {
