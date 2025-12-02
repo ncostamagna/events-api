@@ -72,7 +72,7 @@ func decodeStoreHandler(_ context.Context, r *http.Request) (interface{}, error)
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, resp interface{}) error {
 	r := resp.(response.Response)
-	w.WriteHeader(r.StatusCode()	)
+	w.WriteHeader(r.StatusCode())
 	return json.NewEncoder(w).Encode(r)
 }
 
