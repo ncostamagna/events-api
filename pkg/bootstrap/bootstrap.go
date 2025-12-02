@@ -9,8 +9,6 @@ import (
 	"github.com/ncostamagna/events-api/internal/events"
 )
 
-const METHOD = "method"
-
 func NewEventsService(db *db.DB, logger *slog.Logger) events.Service {
 	return events.NewService(db, logger)
 }
