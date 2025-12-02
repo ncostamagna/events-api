@@ -1,0 +1,10 @@
+services:
+  db_events:
+    image: postgres:latest
+    container_name: db_events
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: db_events
+    ports:
+      - "5452:5432"

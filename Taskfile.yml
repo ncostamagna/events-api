@@ -1,0 +1,57 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  setup:
+    desc: Setup the project
+    cmds:
+      - go mod tidy
+      - go fmt ./...
+      - goimports -w .
+      - docker compose up -d
+      - task migrate-up
+  dev:
+    desc: Start development server with hot reload using Air
+    cmds:
+      - air
+    silent: true
+  clean:
+    desc: Clean up the project
+    cmds:
+      - go mod tidy
+      - go fmt ./...
+      - goimports -w .
+  migrate:
+    desc: Create a new database migration (requires name parameter)
+    cmds:
+      - |
+        if [ -z "{{.name}}" ]; then
+          echo "Error: 'name' parameter is required, use 'task migrate name=name_of_migration'"
+          exit 1
+        fi
+      - migrate create -ext sql -dir "./migrations" -format "20060102030405" "{{.name}}"
+    silent: true
+  migrate-up:
+    desc: Run all pending migrations
+    cmds:
+      - echo "Running migrations up $DB_DNS"
+      - migrate -source file://./migrations -database "$DB_DNS" up
+    silent: true
+  migrate-down:
+    desc: Rollback the last migration
+    cmds:
+      - migrate -source file://./migrations -database "$DB_DNS" down
+    silent: true
+  default:
+    desc: Show all available commands
+    cmds:
+      - echo "Available commands:"
+      - task --list-all
+  test:
+    desc: Run tests and linting with golangci-lint
+    cmds:
+      - go test ./...
+      - golangci-lint run
+    silent: true
+  
