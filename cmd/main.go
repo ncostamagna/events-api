@@ -1,13 +1,11 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/ncostamagna/events-api/pkg/bootstrap"
-	"github.com/ncostamagna/events-api/pkg/httputil"
 	"github.com/ncostamagna/events-api/pkg/log"
 	"github.com/ncostamagna/events-api/transport/httpevents"
 )
@@ -31,23 +29,18 @@ func main() {
 
 	eventsSrv := bootstrap.NewEventsService(bootstrap.NewDatabase(logger), logger)
 
-	h := httpevents.NewHTTPServer(httpevents.MakeEndpoints(eventsSrv))
+	app := httpevents.NewHTTPServer(httpevents.MakeEventsEndpoints(eventsSrv))
 
 	url := os.Getenv("APP_URL")
 	if url == "" {
 		url = defaultURL
 	}
 
-	srv := &http.Server{
-		Handler: httputil.AccessControl(h),
-		Addr:    url,
-	}
-
 	errs := make(chan error)
 
 	go func() {
 		logger.Info("Listening", "url", url)
-		errs <- srv.ListenAndServe()
+		errs <- app.Listen(url)
 	}()
 
 	err := <-errs
