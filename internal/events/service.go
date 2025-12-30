@@ -9,9 +9,16 @@ import (
 	"github.com/ncostamagna/events-api/domain"
 )
 
+const (
+	StatusPending = "PE"
+	StatusCompleted = "CO"
+	StatusCancelled = "CA"
+	StatusInProgress = "PR"
+)
+
 type (
 	Service interface {
-		CreateEvent(ctx context.Context, title string, description string, startTime time.Time, endTime time.Time) (*domain.Event, error)
+		CreateEvent(ctx context.Context, title, description string, startTime, endTime time.Time) (*domain.Event, error)
 		GetEventByID(ctx context.Context, id string) (*domain.Event, error)
 		GetAllEvents(ctx context.Context) ([]domain.Event, error)
 	}
@@ -25,11 +32,12 @@ func NewService(db *db.DB, logger *slog.Logger) Service {
 	return &service{db: db, logger: logger}
 }
 
-func (s *service) CreateEvent(ctx context.Context, title string, description string, startTime time.Time, endTime time.Time) (*domain.Event, error) {
+func (s *service) CreateEvent(ctx context.Context, title, description string, startTime, endTime time.Time) (*domain.Event, error) {
 	s.logger.Debug("Creating event", "title", title, "description", description, "startTime", startTime, "endTime", endTime)
 	event := &domain.Event{
 		Title:       title,
 		Description: description,
+		Status:      StatusPending,
 		StartTime:   startTime,
 		EndTime:     endTime,
 		CreatedAt:   time.Now(),

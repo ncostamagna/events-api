@@ -7,6 +7,7 @@ type (
 		ID          string    `json:"id"`
 		Title       string    `json:"title"`
 		Description string    `json:"description"`
+		Status      string    `json:"status"`
 		StartTime   time.Time `json:"start_time"`
 		EndTime     time.Time `json:"end_time"`
 		CreatedAt   time.Time `json:"created_at"`
